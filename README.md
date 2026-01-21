@@ -35,10 +35,13 @@ Recommended to pair with [Kiwi is not Apple](https://extensions.gnome.org/extens
 
 - Recent Applications menu is cleared after log out. This is limitation of Gnome shell
 
-## Contributing Translations
+## Translations
 
 Want to help translate Kiwi Menu to your language? See the [translation guide](translating/README.md) for instructions.
 
+## Contributing
+
+Contributions and feature requests are welcome. This extension is designed to help macOS users feel at home on GNOME, so the main goal is a clean, minimal menu with familiar behavior. I try to avoid feature creep and large configuration surfaces to keep the project easy to maintain. If you have an idea that is more feature rich, I am happy to point you to similar projects where it may fit better.
 
 ## License
 
