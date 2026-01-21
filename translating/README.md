@@ -10,7 +10,6 @@
 
 | Language | Code | Status | Completion |
 |----------|------|--------|------------|
-| Chinese (Simplified) | zh-CN | 🟢 Complete | 41/42 (97.6%) |
 | German | de | 🟢 Complete | 42/42 (100%) |
 | Spanish | es | 🟢 Complete | 42/42 (100%) |
 | Estonian | et | 🟢 Complete | 41/42 (97.6%) |
@@ -20,17 +19,19 @@
 | Italian | it | 🟢 Complete | 41/42 (97.6%) |
 | Lithuanian | lt | 🟢 Complete | 41/42 (97.6%) |
 | Latvian | lv | 🟢 Complete | 42/42 (100%) |
-| Norwegian Bokmål | nb | 🟢 Complete | 41/42 (97.6%) |
+| Norwegian | nb | 🟢 Complete | 41/42 (97.6%) |
 | Dutch | nl | 🟢 Complete | 41/42 (97.6%) |
 | Polish | pl | 🟢 Complete | 41/42 (97.6%) |
 | Portuguese | pt | 🟢 Complete | 41/42 (97.6%) |
 | Swedish | sv | 🟢 Complete | 41/42 (97.6%) |
+| Chinese (Simplified) | zh-CN | 🟢 Complete | 41/42 (97.6%) |
+| Turkish | tr | 🟢 Complete | 41/42 (97.6%) |
 
 *Note: The "1 untranslated message" in some languages is just the empty header (`msgid ""`), which is standard in PO files.*
 
 ## Note
 
-> Current translations are machine-generated and may contain mistakes. Native speakers are welcome to review and improve them!
+> Some translations are machine-generated and may contain mistakes. Native speakers are welcome to review and improve them!
 
 
 ## Compiling translations for testing
