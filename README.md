@@ -24,7 +24,6 @@ Kiwi Menu replaces the Activities button with a compact, macOS-inspired launcher
 - **Curated session controls**: Sleep, restart, shut down, lock, and log out entries mirror the macOS Apple menu workflow.
 - **Hide Activities**: Hide activities button in top panel.
 - **Hide Power buttons**: Hide Lock screen and Power buttons in Quick Settings
-
 - **Multilingual support**: Fully translatable interface
 
 ## Other extensions
