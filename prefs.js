@@ -81,7 +81,7 @@ const OptionsPage = GObject.registerClass(
       restoreButton.add_css_class?.('circular');
 
       const acceptButton = new Gtk.Button({
-        icon_name: 'emblem-ok-symbolic',
+        icon_name: 'object-select-symbolic',
         has_frame: false,
         tooltip_text: this._('Apply Changes'),
         valign: Gtk.Align.CENTER,
@@ -168,7 +168,7 @@ const OptionsPage = GObject.registerClass(
       labelRestoreButton.add_css_class?.('circular');
 
       const labelAcceptButton = new Gtk.Button({
-        icon_name: 'emblem-ok-symbolic',
+        icon_name: 'object-select-symbolic',
         has_frame: false,
         tooltip_text: this._('Apply Changes'),
         valign: Gtk.Align.CENTER,
@@ -247,7 +247,7 @@ const OptionsPage = GObject.registerClass(
       commandRestoreButton.add_css_class?.('circular');
 
       const commandAcceptButton = new Gtk.Button({
-        icon_name: 'emblem-ok-symbolic',
+        icon_name: 'object-select-symbolic',
         has_frame: false,
         tooltip_text: this._('Apply Changes'),
         valign: Gtk.Align.CENTER,
