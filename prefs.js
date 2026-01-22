@@ -613,7 +613,7 @@ export default class KiwiMenuPreferences extends ExtensionPreferences {
       activatable: true,
     });
 
-    row.add_suffix(new Gtk.Image({ icon_name: 'external-link-symbolic' }));
+    row.add_suffix(new Gtk.Image({ icon_name: 'adw-external-link-symbolic' }));
     row.connect('activated', () => {
       this._launchUri(window, url);
     });
