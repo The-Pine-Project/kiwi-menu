@@ -39,24 +39,11 @@ export function createCustomMenuItem(settings, gettextFunc) {
 
     menuItem.connect('activate', () => {
         try {
-            // If command looks like a simple path without shell quoting, quote it
-            // to handle paths with spaces correctly
-            let commandToExecute = trimmedCommand;
-            const needsQuoting = !trimmedCommand.startsWith('"') &&
-                                 !trimmedCommand.startsWith("'") &&
-                                 trimmedCommand.includes(' ') &&
-                                 !trimmedCommand.includes('" ') &&
-                                 !trimmedCommand.includes("' ");
-            if (needsQuoting) {
-                commandToExecute = GLib.shell_quote(trimmedCommand);
-            }
-
-            const [success, argv] = GLib.shell_parse_argv(commandToExecute);
-            if (success && Array.isArray(argv) && argv.length > 0) {
-                Util.spawn(argv);
-            } else {
-                logError(new Error(`Failed to parse command: ${trimmedCommand}`));
-            }
+            // Run command through user's interactive shell to respect their $PATH
+            // -i sources .bashrc/.zshrc where PATH is typically modified
+            const shell = GLib.getenv('SHELL') || '/bin/bash';
+            const argv = [shell, '-i', '-c', trimmedCommand];
+            Util.spawn(argv);
         } catch (error) {
             logError(error, `Failed to execute custom menu command: ${trimmedCommand}`);
         }
