@@ -426,6 +426,12 @@ export default class KiwiMenuPreferences extends ExtensionPreferences {
     window.set_default_size(450, 700);
     window.set_size_request(400, 550);
     window.set_search_enabled(true);
+
+    // Add custom icons path to GTK icon theme search path
+    const iconTheme = Gtk.IconTheme.get_for_display(Gdk.Display.get_default());
+    const iconsPath = GLib.build_filenamev([this.path, 'src']);
+    iconTheme.add_search_path(iconsPath);
+
     this._ensureVersionCss(window);
 
     const _ = this.gettext.bind(this);
@@ -613,7 +619,7 @@ export default class KiwiMenuPreferences extends ExtensionPreferences {
       activatable: true,
     });
 
-    row.add_suffix(new Gtk.Image({ icon_name: 'adw-external-link-symbolic' }));
+    row.add_suffix(new Gtk.Image({ icon_name: 'external-link-symbolic' }));
     row.connect('activated', () => {
       this._launchUri(window, url);
     });
