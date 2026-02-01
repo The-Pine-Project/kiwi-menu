@@ -237,6 +237,14 @@ msgstr ""
 "Copyright © 2025 Arnis Kemlers. Licenciado bajo los términos de la Licencia "
 "Pública General de GNU versión 3 o posterior."
 
+#: prefs.js
+msgid "Become a sponsor on GitHub"
+msgstr "Conviértete en patrocinador en GitHub"
+
+#: prefs.js
+msgid "Sponsor Me ♡"
+msgstr "Patrocíname ♡"
+
 #~ msgid "Show Activities Button"
 #~ msgstr "Mostrar botón de Actividades"
 

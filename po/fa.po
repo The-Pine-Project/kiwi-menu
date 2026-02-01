@@ -239,3 +239,11 @@ msgid ""
 msgstr ""
 "Copyright © 2025 Arnis Kemlers. تحت شرایط مجوز عمومی همگانی گنو نسخه ۳ یا "
 "نسخه‌های بعدی منتشر شده است."
+
+#: prefs.js
+msgid "Become a sponsor on GitHub"
+msgstr "حامی مالی در GitHub شوید"
+
+#: prefs.js
+msgid "Sponsor Me ♡"
+msgstr "از من حمایت کنید ♡"

@@ -235,3 +235,13 @@ msgid ""
 "Copyright © 2025 Arnis Kemlers. Licensed under the terms of the GNU General "
 "Public License version 3 or later."
 msgstr ""
+"저작권 © 2025 Arnis Kemlers. GNU 일반 공중 사용 허가서 버전 3 이상의 조건에 "
+"따라 라이센스가 부여됩니다."
+
+#: prefs.js
+msgid "Become a sponsor on GitHub"
+msgstr "GitHub에서 후원자가 되기"
+
+#: prefs.js
+msgid "Sponsor Me ♡"
+msgstr "후원하기 ♡"

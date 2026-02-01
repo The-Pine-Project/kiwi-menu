@@ -236,6 +236,14 @@ msgstr ""
 "Autortiesības © 2025 Arnis Kemlers. Licencēts saskaņā ar GNU vispārējās "
 "publiskās licences 3. vai jaunākas versijas noteikumiem."
 
+#: prefs.js
+msgid "Become a sponsor on GitHub"
+msgstr "Kļūsti par sponsoru GitHub"
+
+#: prefs.js
+msgid "Sponsor Me ♡"
+msgstr "Atbalsti mani ♡"
+
 #~ msgid "Show Activities Button"
 #~ msgstr "Rādīt aktivitāšu pogu"
 

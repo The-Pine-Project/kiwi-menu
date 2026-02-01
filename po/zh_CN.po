@@ -237,3 +237,11 @@ msgid ""
 msgstr ""
 "版权所有 © 2025 Arnis Kemlers。依据 GNU 通用公共许可证第 3 版或更高版本的条款"
 "授权。"
+
+#: prefs.js
+msgid "Become a sponsor on GitHub"
+msgstr "在 GitHub 上成为赞助者"
+
+#: prefs.js
+msgid "Sponsor Me ♡"
+msgstr "赞助我 ♡"

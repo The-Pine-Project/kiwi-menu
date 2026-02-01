@@ -232,3 +232,11 @@ msgstr ""
 #: prefs.js
 msgid "Copyright © 2025 Arnis Kemlers. Licensed under the terms of the GNU General Public License version 3 or later."
 msgstr ""
+
+#: prefs.js
+msgid "Become a sponsor on GitHub"
+msgstr ""
+
+#: prefs.js
+msgid "Sponsor Me ♡"
+msgstr ""

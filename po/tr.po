@@ -232,3 +232,11 @@ msgstr "Telif Hakkı"
 #: prefs.js
 msgid "Copyright © 2025 Arnis Kemlers. Licensed under the terms of the GNU General Public License version 3 or later."
 msgstr "Telif Hakkı © 2025 Arnis Kemlers. GNU Genel Kamu Lisansı sürüm 3 veya üzeri şartları altında lisanslanmıştır."
+
+#: prefs.js
+msgid "Become a sponsor on GitHub"
+msgstr "GitHub'da sponsor ol"
+
+#: prefs.js
+msgid "Sponsor Me ♡"
+msgstr "Bana Destek Ol ♡"

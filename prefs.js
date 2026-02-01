@@ -423,8 +423,8 @@ export default class KiwiMenuPreferences extends ExtensionPreferences {
     const settings = this.getSettings();
     window._settings = settings;
     window.title = this.metadata.name ?? 'Kiwi Menu';
-    window.set_default_size(450, 700);
-    window.set_size_request(400, 550);
+    window.set_default_size(500, 710);
+    window.set_size_request(420, 550);
     window.set_search_enabled(true);
 
     // Add custom icons path to GTK icon theme search path
@@ -447,30 +447,8 @@ export default class KiwiMenuPreferences extends ExtensionPreferences {
       return;
 
     const cssProvider = new Gtk.CssProvider();
-    cssProvider.load_from_data(
-      `
-        .kiwimenu-version-pill {
-          padding: 6px 14px;
-          min-height: 0;
-          border-radius: 999px;
-          border: none;
-          background-color: alpha(@accent_bg_color, 0.18);
-          color: @accent_color;
-          font-weight: 600;
-          letter-spacing: 0.05em;
-          text-transform: uppercase;
-        }
-
-        .kiwimenu-version-pill:hover {
-          background-color: alpha(@accent_bg_color, 0.26);
-        }
-
-        .kiwimenu-version-pill:active {
-          background-color: alpha(@accent_bg_color, 0.34);
-        }
-      `,
-      -1
-    );
+    const cssPath = GLib.build_filenamev([this.path, 'prefs.css']);
+    cssProvider.load_from_path(cssPath);
 
     const display = Gdk.Display.get_default();
     if (display)
@@ -494,7 +472,7 @@ export default class KiwiMenuPreferences extends ExtensionPreferences {
     const headerBox = new Gtk.Box({
       orientation: Gtk.Orientation.VERTICAL,
       spacing: 12,
-      margin_top: 24,
+      margin_top: 16,
       margin_bottom: 8,
       margin_start: 16,
       margin_end: 16,
@@ -517,7 +495,7 @@ export default class KiwiMenuPreferences extends ExtensionPreferences {
     const extensionName = this.metadata.name ?? 'Kiwi Menu';
     headerBox.append(
       new Gtk.Label({
-        label: `<span size="xx-large" weight="bold">${extensionName}</span>`,
+        label: `<span size="xx-large" weight="bold">${GLib.markup_escape_text(extensionName, -1)}</span>`,
         use_markup: true,
         halign: Gtk.Align.CENTER,
       })
@@ -545,7 +523,7 @@ export default class KiwiMenuPreferences extends ExtensionPreferences {
       label: versionLabel,
       halign: Gtk.Align.CENTER,
       margin_top: 4,
-      tooltip_text: 'View release notes',
+      tooltip_text: _('Change log'),
     });
     versionButton.add_css_class('pill');
     versionButton.add_css_class('kiwimenu-version-pill');
@@ -571,44 +549,103 @@ export default class KiwiMenuPreferences extends ExtensionPreferences {
     headerGroup.add(headerBox);
     aboutPage.add(headerGroup);
 
-    const linksGroup = new Adw.PreferencesGroup();
+    // Content group with two columns: links (left) and QR + sponsor (right)
+    const contentGroup = new Adw.PreferencesGroup();
+    const contentGrid = new Gtk.Grid({
+      column_spacing: 24,
+      row_spacing: 12,
+      margin_top: 8,
+      margin_bottom: 16,
+      margin_start: 16,
+      margin_end: 16,
+      hexpand: true,
+    });
 
-    linksGroup.add(
-      this._createLinkRow(
-        window,
-        _('Website'),
-        normalizedBaseUrl
-      )
-    );
+    // Left column: link groups styled with ActionRows
+    const leftColumn = new Gtk.Box({
+      orientation: Gtk.Orientation.VERTICAL,
+      spacing: 12,
+      hexpand: true,
+      halign: Gtk.Align.FILL,
+    });
 
-    aboutPage.add(linksGroup);
+    // Separate cards: Website and Report an Issue
+    const websiteCard = new Adw.PreferencesGroup();
+    websiteCard.add(this._createLinkRow(window, _('Website'), normalizedBaseUrl));
+    leftColumn.append(websiteCard);
 
-    const issuesGroup = new Adw.PreferencesGroup();
+    const issueCard = new Adw.PreferencesGroup();
+    issueCard.add(this._createLinkRow(window, _('Report an Issue'), `${normalizedBaseUrl}/issues`));
+    leftColumn.append(issueCard);
 
-    issuesGroup.add(
-      this._createLinkRow(
-        window,
-        _('Report an Issue'),
-        `${normalizedBaseUrl}/issues`
-      )
-    );
+    // Combined Credits & Legal group
+    const infoGroup = new Adw.PreferencesGroup();
+    infoGroup.add(this._createLinkRow(window, _('Credits'), `${normalizedBaseUrl}/graphs/contributors`));
+    infoGroup.add(this._createLegalRow(window, normalizedBaseUrl, _));
+    leftColumn.append(infoGroup);
 
-    aboutPage.add(issuesGroup);
+    contentGrid.attach(leftColumn, 0, 0, 1, 1);
 
-    const legalGroup = new Adw.PreferencesGroup();
+    // Right column: QR + sponsor button
+    const rightColumn = new Gtk.Box({
+      orientation: Gtk.Orientation.VERTICAL,
+      spacing: 12,
+      halign: Gtk.Align.FILL,
+      valign: Gtk.Align.START,
+      margin_top: 35,
+      hexpand: true,
+    });
 
-    legalGroup.add(
-      this._createLinkRow(
-        window,
-        _('Credits'),
-        `${normalizedBaseUrl}/graphs/contributors`
-      )
-    );
-    legalGroup.add(
-      this._createLegalRow(window, normalizedBaseUrl, _)
-    );
+    // QR code button linking to Ko-fi
+    const qrButton = new Gtk.Button({
+      halign: Gtk.Align.CENTER,
+      tooltip_text: 'Buy Me a Coffee',
+    });
+    qrButton.add_css_class('flat');
+    const qrImage = new Gtk.Image({
+      gicon: new Gio.FileIcon({ file: Gio.File.new_for_path(`${this.path}/src/qrcode-symbolic.svg`) }),
+      pixel_size: 128,
+    });
+    qrButton.set_child(qrImage);
+    qrButton.connect('clicked', () => {
+      this._launchUri(window, 'https://buymeacoffee.com/arnisk');
+    });
+    const qrBox = new Gtk.Box({
+      halign: Gtk.Align.CENTER,
+      valign: Gtk.Align.CENTER,
+      margin_bottom: 12,
+    });
+    qrBox.append(qrButton);
+    rightColumn.append(qrBox);
 
-    aboutPage.add(legalGroup);
+    // Sponsor button
+    const coffeeButton = new Gtk.Button({
+      halign: Gtk.Align.CENTER,
+      tooltip_text: _('Become a sponsor on GitHub'),
+    });
+    coffeeButton.add_css_class('pill');
+    coffeeButton.add_css_class('kiwimenu-coffee-button');
+
+    const coffeeContent = new Gtk.Box({
+      orientation: Gtk.Orientation.HORIZONTAL,
+      spacing: 8,
+    });
+    coffeeContent.append(new Gtk.Image({
+      gicon: new Gio.FileIcon({ file: Gio.File.new_for_path(`${this.path}/src/github-symbolic.svg`) }),
+    }));
+    coffeeContent.append(new Gtk.Label({
+      label: _('Sponsor Me ♡'),
+    }));
+    coffeeButton.set_child(coffeeContent);
+    coffeeButton.connect('clicked', () => {
+      this._launchUri(window, 'https://github.com/sponsors/kem-a');
+    });
+    rightColumn.append(coffeeButton);
+
+    contentGrid.attach(rightColumn, 1, 0, 1, 1);
+
+    contentGroup.add(contentGrid);
+    aboutPage.add(contentGroup);
 
     return aboutPage;
   }

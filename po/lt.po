@@ -234,3 +234,13 @@ msgid ""
 "Copyright © 2025 Arnis Kemlers. Licensed under the terms of the GNU General "
 "Public License version 3 or later."
 msgstr ""
+"Autorių teisės © 2025 Arnis Kemlers. Licencijuota pagal GNU bendrosios "
+"viešosios licencijos 3 ar vėlesnės versijos sąlygas."
+
+#: prefs.js
+msgid "Become a sponsor on GitHub"
+msgstr "Tapk rėmėju GitHub platformoje"
+
+#: prefs.js
+msgid "Sponsor Me ♡"
+msgstr "Paremk mane ♡"

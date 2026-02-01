@@ -236,3 +236,13 @@ msgid ""
 "Copyright © 2025 Arnis Kemlers. Licensed under the terms of the GNU General "
 "Public License version 3 or later."
 msgstr ""
+"Copyright © 2025 Arnis Kemlers. Distribuito sotto i termini della Licenza "
+"Pubblica Generale GNU versione 3 o successiva."
+
+#: prefs.js
+msgid "Become a sponsor on GitHub"
+msgstr "Diventa sponsor su GitHub"
+
+#: prefs.js
+msgid "Sponsor Me ♡"
+msgstr "Sponsorizzami ♡"
