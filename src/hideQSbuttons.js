@@ -186,8 +186,10 @@ export class QuickSettingsActionsController {
       return;
     }
 
-    const { actor, notifyId, destroyId } = record;
+    const { actor, notifyId, destroyId, systemVisible } = record;
 
+    // Disconnect signals FIRST so the visibility handler does not
+    // re-hide the button when we restore its original state below.
     if (actor && notifyId) {
       try {
         actor.disconnect(notifyId);
@@ -201,6 +203,15 @@ export class QuickSettingsActionsController {
         actor.disconnect(destroyId);
       } catch (_error) {
         // Actor may already be disposed when tearing down.
+      }
+    }
+
+    // Restore original visibility so buttons reappear when the extension is disabled.
+    if (actor && systemVisible !== undefined) {
+      try {
+        actor.visible = systemVisible;
+      } catch (_error) {
+        // Actor may already be disposed.
       }
     }
 
