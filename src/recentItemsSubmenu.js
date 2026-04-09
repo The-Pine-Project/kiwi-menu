@@ -155,11 +155,11 @@ export const RecentItemsSubmenu = GObject.registerClass(
     return header;
   }
 
-  _populateMenu(menu) {
+  async _populateMenu(menu) {
     menu.removeAll();
 
-    const recentItems = this._getRecentItems();
-    const recentApplications = this._getRecentApplications(APPLICATIONS_RECENT_LIMIT);
+    const recentItems = await this._getRecentItems();
+    const recentApplications = await this._getRecentApplications(APPLICATIONS_RECENT_LIMIT);
 
     const files = [];
     for (const item of recentItems) {
@@ -251,7 +251,7 @@ export const RecentItemsSubmenu = GObject.registerClass(
     }
 
     if (this._recentMenu) {
-      this._populateMenu(this._recentMenu);
+      this._populateMenu(this._recentMenu).catch(logError);
     }
   }
 
@@ -489,7 +489,7 @@ export const RecentItemsSubmenu = GObject.registerClass(
 
   _ensureRecentMenu() {
     if (this._recentMenu) {
-      this._populateMenu(this._recentMenu);
+      this._populateMenu(this._recentMenu).catch(logError);
       this._connectMainMenuItemSignals();
       return this._recentMenu;
     }
@@ -514,7 +514,7 @@ export const RecentItemsSubmenu = GObject.registerClass(
       this._managerRegistered = true;
     }
 
-    this._populateMenu(this._recentMenu);
+    this._populateMenu(this._recentMenu).catch(logError);
     this._connectMainMenuItemSignals();
 
     this._recentMenuMenuSignalIds.push(
@@ -843,7 +843,7 @@ export const RecentItemsSubmenu = GObject.registerClass(
     }
   }
 
-  _getApplicationState() {
+  async _getApplicationState() {
     const state = new Map();
     const file = Gio.File.new_for_path(APPLICATION_STATE_FILE);
 
@@ -852,7 +852,7 @@ export const RecentItemsSubmenu = GObject.registerClass(
     }
 
     try {
-      const [, contents] = file.load_contents(null);
+      const [contents] = await file.load_contents_async(null);
       const text = new TextDecoder().decode(contents);
       const regex = /<application\b([^>]*)\/>/g;
       let match;
@@ -883,7 +883,7 @@ export const RecentItemsSubmenu = GObject.registerClass(
     return state;
   }
 
-  _getRecentApplications(limit = APPLICATIONS_RECENT_LIMIT) {
+  async _getRecentApplications(limit = APPLICATIONS_RECENT_LIMIT) {
     const applications = [];
 
     if (!Shell?.AppUsage?.get_default) {
@@ -891,7 +891,7 @@ export const RecentItemsSubmenu = GObject.registerClass(
     }
 
     const sortMode = APPLICATION_SORT_MODE === 'recent' ? 'recent' : 'usage';
-    const stateMap = sortMode === 'recent' ? this._getApplicationState() : null;
+    const stateMap = sortMode === 'recent' ? await this._getApplicationState() : null;
 
     try {
       const usage = Shell.AppUsage.get_default();
@@ -971,7 +971,7 @@ export const RecentItemsSubmenu = GObject.registerClass(
     return applications.slice(0, limit);
   }
 
-  _getRecentItems() {
+  async _getRecentItems() {
     const file = Gio.File.new_for_path(RECENT_ITEMS_FILE);
     if (!file.query_exists(null)) {
       return [];
@@ -979,7 +979,7 @@ export const RecentItemsSubmenu = GObject.registerClass(
 
     let contents;
     try {
-      [, contents] = file.load_contents(null);
+      [contents] = await file.load_contents_async(null);
     } catch (error) {
       logError(error, 'Failed to read recent items list');
       return [];

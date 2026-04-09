@@ -15,13 +15,13 @@ import { openForceQuitOverlay } from './forceQuitOverlay.js';
 import { RecentItemsSubmenu } from './recentItemsSubmenu.js';
 import { createCustomMenuItem } from './customMenuItem.js';
 
-function loadJsonFile(basePath, segments) {
+async function loadJsonFileAsync(basePath, segments) {
   const textDecoder = new TextDecoder();
   const filePath = GLib.build_filenamev([basePath, ...segments]);
 
   try {
     const file = Gio.File.new_for_path(filePath);
-    const [, contents] = file.load_contents(null);
+    const [contents] = await file.load_contents_async(null);
     const parsed = JSON.parse(textDecoder.decode(contents));
     return Array.isArray(parsed) ? parsed : [];
   } catch (error) {
@@ -42,16 +42,10 @@ export const KiwiMenu = GObject.registerClass(
   this._menuOpenSignalId = 0;
   this._recentMenuManager = new PopupMenu.PopupMenuManager(this);
 
-      this._icons = Object.freeze(
-        loadJsonFile(this._extensionPath, ['src', 'icons.json']).map((icon) =>
-          Object.freeze(icon)
-        )
-      );
-      this._layout = Object.freeze(
-        loadJsonFile(this._extensionPath, ['src', 'menulayout.json']).map((item) =>
-          Object.freeze(item)
-        )
-      );
+      this._icons = Object.freeze([]);
+      this._layout = Object.freeze([]);
+
+      this._loadDataAsync().catch(logError);
 
       if (this.menu?.actor) {
         this.menu.actor.add_style_class_name('kiwi-main-menu');
@@ -102,10 +96,26 @@ export const KiwiMenu = GObject.registerClass(
           }
         }
       );
+    }
 
-      this._setIcon();
-      this._syncActivitiesVisibility();
-      this._renderPopupMenu();
+    async _loadDataAsync() {
+      try {
+        const [icons, layout] = await Promise.all([
+          loadJsonFileAsync(this._extensionPath, ['src', 'icons.json']),
+          loadJsonFileAsync(this._extensionPath, ['src', 'menulayout.json']),
+        ]);
+
+        if (!this._settings) return;
+
+        this._icons = Object.freeze(icons.map((icon) => Object.freeze(icon)));
+        this._layout = Object.freeze(layout.map((item) => Object.freeze(item)));
+
+        this._setIcon();
+        this._syncActivitiesVisibility();
+        this._renderPopupMenu();
+      } catch (error) {
+        logError(error, 'Failed to load initial Kiwi Menu data');
+      }
     }
 
     destroy() {
