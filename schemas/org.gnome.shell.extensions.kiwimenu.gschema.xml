@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schemalist gettext-domain="kiwimenu@kemma">
+<schemalist gettext-domain="gnome-shell-extensions-kiwimenu">
   <schema path="/org/gnome/shell/extensions/kiwimenu/" id="org.gnome.shell.extensions.kiwimenu">
     <key type="i" name="icon">
       <default>0</default>
