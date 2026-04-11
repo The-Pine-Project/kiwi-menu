@@ -111,16 +111,14 @@ export const RecentItemsSubmenu = GObject.registerClass(
     this.actor.connect('button-press-event', () => {
       this._cancelClose();
       this._cancelOpenDelay();
-      const menu = this._ensureRecentMenu();
-      menu.open(true);
+      this._ensureRecentMenuAndOpen().catch(logError);
       return Clutter.EVENT_STOP;
     });
 
     this.connect('activate', () => {
       this._cancelClose();
       this._cancelOpenDelay();
-      const menu = this._ensureRecentMenu();
-      menu.open(true);
+      this._ensureRecentMenuAndOpen().catch(logError);
     });
   }
 
@@ -401,8 +399,7 @@ export const RecentItemsSubmenu = GObject.registerClass(
       RECENT_OPEN_DELAY_MS,
       () => {
         this._openDelayTimeoutId = 0;
-        const menu = this._ensureRecentMenu();
-        menu.open(true);
+        this._ensureRecentMenuAndOpen().catch(logError);
         return GLib.SOURCE_REMOVE;
       }
     );
@@ -487,9 +484,14 @@ export const RecentItemsSubmenu = GObject.registerClass(
     });
   }
 
-  _ensureRecentMenu() {
+  async _ensureRecentMenuAndOpen() {
+    const menu = await this._ensureRecentMenu();
+    menu.open(true);
+  }
+
+  async _ensureRecentMenu() {
     if (this._recentMenu) {
-      this._populateMenu(this._recentMenu).catch(logError);
+      await this._populateMenu(this._recentMenu);
       this._connectMainMenuItemSignals();
       return this._recentMenu;
     }
@@ -514,7 +516,7 @@ export const RecentItemsSubmenu = GObject.registerClass(
       this._managerRegistered = true;
     }
 
-    this._populateMenu(this._recentMenu).catch(logError);
+    await this._populateMenu(this._recentMenu);
     this._connectMainMenuItemSignals();
 
     this._recentMenuMenuSignalIds.push(
