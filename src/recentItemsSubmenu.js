@@ -9,6 +9,7 @@ import GObject from 'gi://GObject';
 import St from 'gi://St';
 import Clutter from 'gi://Clutter';
 import Shell from 'gi://Shell';
+const ByteArray = imports.byteArray;
 
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
@@ -38,6 +39,45 @@ const PointerState = {
   BRIDGE: 2,
   OUTSIDE: 3,
 };
+
+async function loadFileContentsAsync(file) {
+  return await new Promise((resolve, reject) => {
+    // Prefer load_bytes_async when available (newer GLib/GIO)
+    if (typeof file.load_bytes_async === 'function') {
+      file.load_bytes_async(null, (f, res) => {
+        try {
+          const [bytes] = f.load_bytes_finish(res);
+          const raw = bytes && typeof bytes.get_data === 'function' ? bytes.get_data() : bytes;
+          resolve(raw);
+        } catch (e) {
+          reject(e);
+        }
+      });
+      return;
+    }
+
+    // Fallback to load_contents_async (older API)
+    if (typeof file.load_contents_async === 'function') {
+      file.load_contents_async(null, (f, res) => {
+        try {
+          const [contents] = f.load_contents_finish(res);
+          resolve(contents);
+        } catch (e) {
+          reject(e);
+        }
+      });
+      return;
+    }
+
+    // Last resort: synchronous load
+    try {
+      const [contents] = file.load_contents(null);
+      resolve(contents);
+    } catch (e) {
+      reject(e);
+    }
+  });
+}
 
 /**
  * A submenu item that shows recent files in a popup menu.
@@ -854,8 +894,8 @@ export const RecentItemsSubmenu = GObject.registerClass(
     }
 
     try {
-      const [contents] = await file.load_contents_async(null);
-      const text = new TextDecoder().decode(contents);
+        const contents = await loadFileContentsAsync(file);
+        const text = ByteArray.toString(contents);
       const regex = /<application\b([^>]*)\/>/g;
       let match;
 
@@ -981,13 +1021,13 @@ export const RecentItemsSubmenu = GObject.registerClass(
 
     let contents;
     try {
-      [contents] = await file.load_contents_async(null);
+      contents = await loadFileContentsAsync(file);
     } catch (error) {
       logError(error, 'Failed to read recent items list');
       return [];
     }
 
-    const text = new TextDecoder().decode(contents);
+    const text = ByteArray.toString(contents);
     const regex = /<bookmark[^>]*href="([^"]+)"[^>]*modified="([^"]+)"[^>]*>([\s\S]*?<title>([^<]*)<\/title>)?/g;
     const items = [];
     const seenUris = new Set();
