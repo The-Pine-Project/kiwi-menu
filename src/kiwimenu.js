@@ -7,6 +7,7 @@ import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 import St from 'gi://St';
+const ByteArray = imports.byteArray;
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
@@ -16,13 +17,22 @@ import { RecentItemsSubmenu } from './recentItemsSubmenu.js';
 import { createCustomMenuItem } from './customMenuItem.js';
 
 async function loadJsonFileAsync(basePath, segments) {
-  const textDecoder = new TextDecoder();
   const filePath = GLib.build_filenamev([basePath, ...segments]);
 
   try {
     const file = Gio.File.new_for_path(filePath);
-    const [contents] = await file.load_contents_async(null);
-    const parsed = JSON.parse(textDecoder.decode(contents));
+    const bytes = await new Promise((resolve, reject) => {
+      file.load_bytes_async(null, (file, result) => {
+        try {
+          const [contents] = file.load_bytes_finish(result);
+          resolve(contents);
+        } catch (e) {
+          reject(e);
+        }
+      });
+    });
+    const jsonString = ByteArray.toString(bytes.get_data());
+    const parsed = JSON.parse(jsonString);
     return Array.isArray(parsed) ? parsed : [];
   } catch (error) {
     logError(error, `Failed to load JSON data from ${filePath}`);
