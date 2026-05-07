@@ -7,7 +7,6 @@ import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 import St from 'gi://St';
-const ByteArray = imports.byteArray;
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
@@ -31,8 +30,7 @@ async function loadJsonFileAsync(basePath, segments) {
         }
       });
     });
-    const jsonString = ByteArray.toString(bytes.get_data());
-    const parsed = JSON.parse(jsonString);
+    const parsed = JSON.parse(new TextDecoder().decode(bytes.get_data()));
     return Array.isArray(parsed) ? parsed : [];
   } catch (error) {
     logError(error, `Failed to load JSON data from ${filePath}`);
