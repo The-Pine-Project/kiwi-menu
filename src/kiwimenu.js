@@ -15,30 +15,28 @@ import { openForceQuitOverlay } from './forceQuitOverlay.js';
 import { RecentItemsSubmenu } from './recentItemsSubmenu.js';
 import { createCustomMenuItem } from './customMenuItem.js';
 
-async function loadJsonFileAsync(basePath, segments) {
+Gio._promisify(Gio.File.prototype, 'load_bytes_async');
+Gio._promisify(Gio.File.prototype, 'load_contents_async');
+
+async function loadJsonFileAsync(basePath, segments, cancellable) {
   const filePath = GLib.build_filenamev([basePath, ...segments]);
 
   try {
     const file = Gio.File.new_for_path(filePath);
-    const bytes = await new Promise((resolve, reject) => {
-      file.load_bytes_async(null, (file, result) => {
-        try {
-          const [contents] = file.load_bytes_finish(result);
-          resolve(contents);
-        } catch (e) {
-          reject(e);
-        }
-      });
-    });
+    const [bytes] = await file.load_bytes_async(cancellable);
     const parsed = JSON.parse(new TextDecoder().decode(bytes.get_data()));
     return Array.isArray(parsed) ? parsed : [];
   } catch (error) {
+    if (error?.matches?.(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED)) {
+      return [];
+    }
     logError(error, `Failed to load JSON data from ${filePath}`);
     return [];
   }
 }
 
 export const KiwiMenu = GObject.registerClass(
+  { GTypeName: 'KiwiMenuButton' },
   class KiwiMenu extends PanelMenu.Button {
     _init(settings, extensionPath, extension) {
       super._init(0.5, 'KiwiMenu');
@@ -49,9 +47,11 @@ export const KiwiMenu = GObject.registerClass(
   this._settingsSignalIds = [];
   this._menuOpenSignalId = 0;
   this._recentMenuManager = new PopupMenu.PopupMenuManager(this);
+  this._cancellable = new Gio.Cancellable();
+  this._isDestroyed = false;
 
-      this._icons = Object.freeze([]);
-      this._layout = Object.freeze([]);
+      this._icons = [];
+      this._layout = [];
 
       this._loadDataAsync().catch(logError);
 
@@ -77,22 +77,22 @@ export const KiwiMenu = GObject.registerClass(
       );
       this._settingsSignalIds.push(
         this._settings.connect('changed::app-store-command', () =>
-          this._renderPopupMenu()
+          this._renderPopupMenu().catch(logError)
         )
       );
       this._settingsSignalIds.push(
         this._settings.connect('changed::custom-menu-enabled', () =>
-          this._renderPopupMenu()
+          this._renderPopupMenu().catch(logError)
         )
       );
       this._settingsSignalIds.push(
         this._settings.connect('changed::custom-menu-label', () =>
-          this._renderPopupMenu()
+          this._renderPopupMenu().catch(logError)
         )
       );
       this._settingsSignalIds.push(
         this._settings.connect('changed::custom-menu-command', () =>
-          this._renderPopupMenu()
+          this._renderPopupMenu().catch(logError)
         )
       );
 
@@ -100,7 +100,7 @@ export const KiwiMenu = GObject.registerClass(
         'open-state-changed',
         (_, isOpen) => {
           if (isOpen) {
-            this._renderPopupMenu();
+            this._renderPopupMenu().catch(logError);
           }
         }
       );
@@ -109,24 +109,32 @@ export const KiwiMenu = GObject.registerClass(
     async _loadDataAsync() {
       try {
         const [icons, layout] = await Promise.all([
-          loadJsonFileAsync(this._extensionPath, ['src', 'icons.json']),
-          loadJsonFileAsync(this._extensionPath, ['src', 'menulayout.json']),
+          loadJsonFileAsync(this._extensionPath, ['src', 'icons.json'], this._cancellable),
+          loadJsonFileAsync(this._extensionPath, ['src', 'menulayout.json'], this._cancellable),
         ]);
 
-        if (!this._settings) return;
+        if (this._isDestroyed || !this._settings) return;
 
-        this._icons = Object.freeze(icons.map((icon) => Object.freeze(icon)));
-        this._layout = Object.freeze(layout.map((item) => Object.freeze(item)));
+        this._icons = icons;
+        this._layout = layout;
 
         this._setIcon();
         this._syncActivitiesVisibility();
-        this._renderPopupMenu();
+        await this._renderPopupMenu();
       } catch (error) {
+        if (this._isDestroyed) return;
         logError(error, 'Failed to load initial Kiwi Menu data');
       }
     }
 
     destroy() {
+      this._isDestroyed = true;
+
+      if (this._cancellable) {
+        this._cancellable.cancel();
+        this._cancellable = null;
+      }
+
       this._settingsSignalIds.forEach((id) => this._settings.disconnect(id));
       this._settingsSignalIds = [];
 
@@ -204,6 +212,8 @@ export const KiwiMenu = GObject.registerClass(
       this.menu.removeAll();
 
       const layout = await this._generateLayout();
+      if (this._isDestroyed) return;
+
       let customMenuAdded = false;
 
       layout.forEach((item) => {
@@ -235,6 +245,8 @@ export const KiwiMenu = GObject.registerClass(
 
       const layoutSource = this._layout ?? [];
       const hasMultipleUsers = await this._hasMultipleLoginUsers();
+      if (this._isDestroyed) return [];
+
       const items = [];
 
       for (const item of layoutSource) {
@@ -271,59 +283,50 @@ export const KiwiMenu = GObject.registerClass(
     async _hasMultipleLoginUsers() {
       try {
         const file = Gio.File.new_for_path('/etc/passwd');
-        
-        return await new Promise((resolve, reject) => {
-          file.load_contents_async(null, (source, result) => {
-            try {
-              const [success, contents] = source.load_contents_finish(result);
-              if (!success || !contents) {
-                resolve(false);
-                return;
-              }
-              
-              const decoder = new TextDecoder();
-              const data = decoder.decode(contents);
+        const [contents] = await file.load_contents_async(this._cancellable);
+        if (this._isDestroyed || !contents) {
+          return false;
+        }
 
-              let count = 0;
-              for (const line of data.split('\n')) {
-                if (!line || line.startsWith('#')) {
-                  continue;
-                }
+        const data = new TextDecoder().decode(contents);
 
-                const parts = line.split(':');
-                if (parts.length < 7) {
-                  continue;
-                }
+        let count = 0;
+        for (const line of data.split('\n')) {
+          if (!line || line.startsWith('#')) {
+            continue;
+          }
 
-                const uid = Number.parseInt(parts[2], 10);
-                const shell = parts[6]?.trim();
+          const parts = line.split(':');
+          if (parts.length < 7) {
+            continue;
+          }
 
-                if (!Number.isInteger(uid)) {
-                  continue;
-                }
+          const uid = Number.parseInt(parts[2], 10);
+          const shell = parts[6]?.trim();
 
-                if (
-                  uid >= 1000 &&
-                  shell &&
-                  shell !== '/usr/sbin/nologin' &&
-                  shell !== '/usr/bin/nologin' &&
-                  shell !== '/bin/false'
-                ) {
-                  count += 1;
-                  if (count > 1) {
-                    resolve(true);
-                    return;
-                  }
-                }
-              }
+          if (!Number.isInteger(uid)) {
+            continue;
+          }
 
-              resolve(false);
-            } catch (error) {
-              reject(error);
+          if (
+            uid >= 1000 &&
+            shell &&
+            shell !== '/usr/sbin/nologin' &&
+            shell !== '/usr/bin/nologin' &&
+            shell !== '/bin/false'
+          ) {
+            count += 1;
+            if (count > 1) {
+              return true;
             }
-          });
-        });
+          }
+        }
+
+        return false;
       } catch (error) {
+        if (error?.matches?.(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED)) {
+          return false;
+        }
         logError(error, 'Failed to determine available login users');
         return false;
       }

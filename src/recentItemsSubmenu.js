@@ -39,17 +39,10 @@ const PointerState = {
   OUTSIDE: 3,
 };
 
-async function loadFileTextAsync(file) {
-  const bytes = await new Promise((resolve, reject) => {
-    file.load_bytes_async(null, (f, res) => {
-      try {
-        const [contents] = f.load_bytes_finish(res);
-        resolve(contents);
-      } catch (e) {
-        reject(e);
-      }
-    });
-  });
+Gio._promisify(Gio.File.prototype, 'load_bytes_async');
+
+async function loadFileTextAsync(file, cancellable) {
+  const [bytes] = await file.load_bytes_async(cancellable);
   return new TextDecoder().decode(bytes.get_data());
 }
 
@@ -58,6 +51,7 @@ async function loadFileTextAsync(file) {
  * Manages hover state, timeouts, and pointer tracking for smooth UX.
  */
 export const RecentItemsSubmenu = GObject.registerClass(
+  { GTypeName: 'KiwiMenuRecentItemsSubmenu' },
   class RecentItemsSubmenu extends PopupMenu.PopupBaseMenuItem {
     _init(title, parentMenu, recentMenuManager, extension) {
       super._init({
@@ -84,6 +78,8 @@ export const RecentItemsSubmenu = GObject.registerClass(
     this._recentMenuClosing = false;
     this._mainMenuItemSignalIds = [];
     this._globalHoverMonitorId = 0;
+    this._cancellable = new Gio.Cancellable();
+    this._isDestroyed = false;
 
     // Build UI
     const label = new St.Label({
@@ -137,6 +133,13 @@ export const RecentItemsSubmenu = GObject.registerClass(
   }
 
   destroy() {
+    this._isDestroyed = true;
+
+    if (this._cancellable) {
+      this._cancellable.cancel();
+      this._cancellable = null;
+    }
+
     // Clean up all timeouts before destroying
     this._cancelClose();
     this._cancelOpenDelay();
@@ -171,7 +174,10 @@ export const RecentItemsSubmenu = GObject.registerClass(
     menu.removeAll();
 
     const recentItems = await this._getRecentItems();
+    if (this._isDestroyed) return;
+
     const recentApplications = await this._getRecentApplications(APPLICATIONS_RECENT_LIMIT);
+    if (this._isDestroyed) return;
 
     const files = [];
     for (const item of recentItems) {
@@ -506,6 +512,7 @@ export const RecentItemsSubmenu = GObject.registerClass(
   async _ensureRecentMenu() {
     if (this._recentMenu) {
       await this._populateMenu(this._recentMenu);
+      if (this._isDestroyed) return this._recentMenu;
       this._connectMainMenuItemSignals();
       return this._recentMenu;
     }
@@ -531,6 +538,7 @@ export const RecentItemsSubmenu = GObject.registerClass(
     }
 
     await this._populateMenu(this._recentMenu);
+    if (this._isDestroyed) return this._recentMenu;
     this._connectMainMenuItemSignals();
 
     this._recentMenuMenuSignalIds.push(
@@ -868,7 +876,10 @@ export const RecentItemsSubmenu = GObject.registerClass(
     }
 
     try {
-      const text = await loadFileTextAsync(file);
+      const text = await loadFileTextAsync(file, this._cancellable);
+      if (this._isDestroyed) {
+        return state;
+      }
       const regex = /<application\b([^>]*)\/>/g;
       let match;
 
@@ -892,6 +903,9 @@ export const RecentItemsSubmenu = GObject.registerClass(
         });
       }
     } catch (error) {
+      if (error?.matches?.(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED)) {
+        return state;
+      }
       logError(error, 'Failed to read recent applications state');
     }
 
@@ -994,9 +1008,16 @@ export const RecentItemsSubmenu = GObject.registerClass(
 
     let text;
     try {
-      text = await loadFileTextAsync(file);
+      text = await loadFileTextAsync(file, this._cancellable);
     } catch (error) {
+      if (error?.matches?.(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED)) {
+        return [];
+      }
       logError(error, 'Failed to read recent items list');
+      return [];
+    }
+
+    if (this._isDestroyed) {
       return [];
     }
 

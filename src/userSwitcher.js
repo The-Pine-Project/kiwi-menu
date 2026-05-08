@@ -16,6 +16,9 @@ import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import * as Util from 'resource:///org/gnome/shell/misc/util.js';
 import { Avatar as UserAvatar } from 'resource:///org/gnome/shell/ui/userWidget.js';
 
+Gio._promisify(Gio.DBusProxy, 'new', 'new_finish');
+Gio._promisify(Gio.DBusProxy.prototype, 'call');
+
 const DEFAULT_BUTTON_ICON = 'system-users-symbolic';
 const AVATAR_ICON_SIZE = 64;
 const MINIMUM_VISIBLE_UID = 1000;
@@ -128,6 +131,7 @@ export class UserSwitcherController {
 }
 
 export const UserSwitcherButton = GObject.registerClass(
+  { GTypeName: 'KiwiMenuUserSwitcherButton' },
   class UserSwitcherButton extends PanelMenu.Button {
     _init(extension) {
       super._init(1.0, 'KiwiUserSwitcher');
@@ -136,7 +140,10 @@ export const UserSwitcherButton = GObject.registerClass(
       this._menuSignals = [];
       this._userManager = null;
       this._loginManagerProxy = null;
+      this._loginManagerProxyPromise = null;
       this._repaintFuncId = 0;
+      this._cancellable = new Gio.Cancellable();
+      this._isDestroyed = false;
       this._gettext = extension?.gettext?.bind(extension) ?? ((text) => text);
       this._buttonIcon = new St.Icon({
         icon_name: DEFAULT_BUTTON_ICON,
@@ -156,7 +163,7 @@ export const UserSwitcherButton = GObject.registerClass(
 
       this._menuOpenSignalId = this.menu?.connect('open-state-changed', (_, open) => {
         if (open) {
-          this._rebuildMenu();
+          this._rebuildMenu().catch(logError);
         }
       }) ?? 0;
 
@@ -164,6 +171,13 @@ export const UserSwitcherButton = GObject.registerClass(
     }
 
     destroy() {
+      this._isDestroyed = true;
+
+      if (this._cancellable) {
+        this._cancellable.cancel();
+        this._cancellable = null;
+      }
+
       this._disconnectUserManagerSignals();
 
       if (this._menuOpenSignalId) {
@@ -174,6 +188,7 @@ export const UserSwitcherButton = GObject.registerClass(
       this._clearRepaintFunc();
 
       this._loginManagerProxy = null;
+      this._loginManagerProxyPromise = null;
       this._userManager = null;
       this._extension = null;
 
@@ -187,16 +202,17 @@ export const UserSwitcherButton = GObject.registerClass(
         return;
       }
 
+      const rebuild = () => this._rebuildMenu().catch(logError);
       this._menuSignals = [
-        this._userManager.connect('notify::is-loaded', () => this._rebuildMenu()),
-        this._userManager.connect('user-added', () => this._rebuildMenu()),
-        this._userManager.connect('user-removed', () => this._rebuildMenu()),
-        this._userManager.connect('user-changed', () => this._rebuildMenu()),
-        this._userManager.connect('user-is-logged-in-changed', () => this._rebuildMenu()),
+        this._userManager.connect('notify::is-loaded', rebuild),
+        this._userManager.connect('user-added', rebuild),
+        this._userManager.connect('user-removed', rebuild),
+        this._userManager.connect('user-changed', rebuild),
+        this._userManager.connect('user-is-logged-in-changed', rebuild),
       ];
 
       if (this._userManager.is_loaded) {
-        this._rebuildMenu();
+        rebuild();
       } else {
         this._userManager.list_users();
       }
@@ -211,7 +227,7 @@ export const UserSwitcherButton = GObject.registerClass(
       this._menuSignals = [];
     }
 
-    _rebuildMenu() {
+    async _rebuildMenu() {
       if (!this._userManager || !this.menu) {
         return;
       }
@@ -224,7 +240,10 @@ export const UserSwitcherButton = GObject.registerClass(
 
       const currentUserName = GLib.get_user_name();
       const users = this._collectVisibleUsers(currentUserName);
-      const sessionInfo = this._getSessionInfo();
+      const sessionInfo = await this._getSessionInfo();
+      if (this._isDestroyed || !this.menu) {
+        return;
+      }
 
       if (users.length === 0) {
         const placeholder = new PopupMenu.PopupMenuItem(this._gettext('No eligible user accounts found'));
@@ -280,83 +299,69 @@ export const UserSwitcherButton = GObject.registerClass(
 
     _ensureLoginManagerProxy() {
       if (this._loginManagerProxy) {
-        return this._loginManagerProxy;
+        return Promise.resolve(this._loginManagerProxy);
       }
 
-      try {
-        this._loginManagerProxy = Gio.DBusProxy.new_sync(
-          Gio.DBus.system,
-          Gio.DBusProxyFlags.NONE,
-          null,
-          'org.freedesktop.login1',
-          '/org/freedesktop/login1',
-          'org.freedesktop.login1.Manager',
-          null
-        );
-      } catch (error) {
-        logError(error, 'Failed to acquire login1 Manager proxy');
-        this._loginManagerProxy = null;
+      if (this._loginManagerProxyPromise) {
+        return this._loginManagerProxyPromise;
       }
 
-      return this._loginManagerProxy;
-    }
-
-    _getSessionClass(sessionPath) {
-      if (typeof sessionPath !== 'string') {
-        return null;
-      }
-
-      if (!sessionPath.startsWith('/org/freedesktop/login1/session/')) {
-        return null;
-      }
-
-      try {
-        const sessionProxy = Gio.DBusProxy.new_sync(
-          Gio.DBus.system,
-          Gio.DBusProxyFlags.GET_INVALIDATED_PROPERTIES,
-          null,
-          'org.freedesktop.login1',
-          sessionPath,
-          'org.freedesktop.login1.Session',
-          null
-        );
-
-        if (!sessionProxy) {
+      this._loginManagerProxyPromise = (async () => {
+        try {
+          const proxy = await Gio.DBusProxy.new(
+            Gio.DBus.system,
+            Gio.DBusProxyFlags.NONE,
+            null,
+            'org.freedesktop.login1',
+            '/org/freedesktop/login1',
+            'org.freedesktop.login1.Manager',
+            this._cancellable
+          );
+          if (this._isDestroyed) {
+            return null;
+          }
+          this._loginManagerProxy = proxy;
+          return proxy;
+        } catch (error) {
+          if (!error?.matches?.(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED)) {
+            logError(error, 'Failed to acquire login1 Manager proxy');
+          }
+          this._loginManagerProxy = null;
           return null;
+        } finally {
+          this._loginManagerProxyPromise = null;
         }
+      })();
 
-        const classVariant = sessionProxy.get_cached_property('Class');
-        return classVariant?.deepUnpack?.() ?? null;
-      } catch (error) {
-        logError(error, `Failed to read session class for ${sessionPath}`);
-        return null;
-      }
+      return this._loginManagerProxyPromise;
     }
 
-    _getSessionActiveState(sessionPath) {
+    async _getSessionProperty(sessionPath, propertyName) {
       if (typeof sessionPath !== 'string' || !sessionPath.startsWith('/org/freedesktop/login1/session/')) {
         return null;
       }
 
       try {
-        const sessionProxy = Gio.DBusProxy.new_sync(
+        const sessionProxy = await Gio.DBusProxy.new(
           Gio.DBus.system,
           Gio.DBusProxyFlags.GET_INVALIDATED_PROPERTIES,
           null,
           'org.freedesktop.login1',
           sessionPath,
           'org.freedesktop.login1.Session',
-          null
+          this._cancellable
         );
-
-        if (!sessionProxy) {
+        if (this._isDestroyed || !sessionProxy) {
           return null;
         }
 
-        const activeVariant = sessionProxy.get_cached_property('Active');
-        return activeVariant?.deepUnpack?.() ?? null;
+        const variant = sessionProxy.get_cached_property(propertyName);
+        return variant?.deepUnpack?.() ?? null;
       } catch (error) {
-        logError(error, `Failed to read session active state for ${sessionPath}`);
+        if (error?.matches?.(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED)) {
+          return null;
+        }
+        logError(error, `Failed to read session ${propertyName} for ${sessionPath}`);
         return null;
       }
     }
@@ -367,23 +372,26 @@ export const UserSwitcherButton = GObject.registerClass(
      * - loggedInUsers: Set of usernames with active sessions
      * - sessions: Map of username -> {sessionId, seat, sessionClass} for graphical sessions
      */
-    _getSessionInfo() {
+    async _getSessionInfo() {
       const loggedInUsers = new Set();
       const sessions = new Map();
 
-      const loginManagerProxy = this._ensureLoginManagerProxy();
-      if (!loginManagerProxy) {
+      const loginManagerProxy = await this._ensureLoginManagerProxy();
+      if (!loginManagerProxy || this._isDestroyed) {
         return { loggedInUsers, sessions };
       }
 
       try {
-        const result = loginManagerProxy.call_sync(
+        const result = await loginManagerProxy.call(
           'ListSessions',
           null,
           Gio.DBusCallFlags.NONE,
           -1,
-          null
+          this._cancellable
         );
+        if (this._isDestroyed) {
+          return { loggedInUsers, sessions };
+        }
 
         const rawList = result?.deepUnpack?.() ?? [];
         const sessionList = (rawList.length === 1 && Array.isArray(rawList[0]) && Array.isArray(rawList[0][0]))
@@ -402,12 +410,18 @@ export const UserSwitcherButton = GObject.registerClass(
             continue;
           }
 
-          const sessionClass = this._getSessionClass(sessionPathStr);
+          const sessionClass = await this._getSessionProperty(sessionPathStr, 'Class');
+          if (this._isDestroyed) {
+            return { loggedInUsers, sessions };
+          }
           if (sessionClass !== 'user') {
             continue;
           }
 
-          const isActive = this._getSessionActiveState(sessionPathStr);
+          const isActive = await this._getSessionProperty(sessionPathStr, 'Active');
+          if (this._isDestroyed) {
+            return { loggedInUsers, sessions };
+          }
           const existing = sessions.get(userName);
 
           // Prefer active session; otherwise keep the first user-class session
@@ -416,7 +430,9 @@ export const UserSwitcherButton = GObject.registerClass(
           }
         }
       } catch (error) {
-        logError(error, 'Failed to get session info from login1 D-Bus');
+        if (!error?.matches?.(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED)) {
+          logError(error, 'Failed to get session info from login1 D-Bus');
+        }
       }
 
       return { loggedInUsers, sessions };
@@ -549,7 +565,7 @@ export const UserSwitcherButton = GObject.registerClass(
       content.add_child(nameLabel);
       button.set_child(content);
 
-      button.connect('clicked', () => this._activateUser(user));
+      button.connect('clicked', () => this._activateUser(user).catch(logError));
 
       return button;
     }
@@ -563,7 +579,7 @@ export const UserSwitcherButton = GObject.registerClass(
       this.menu.addMenuItem(item);
     }
 
-    _activateUser(user) {
+    async _activateUser(user) {
       if (!user) {
         return;
       }
@@ -583,36 +599,46 @@ export const UserSwitcherButton = GObject.registerClass(
 
       // Try to find and activate user's session
       // Don't rely on is_logged_in_anywhere() as it can be stale
-      const activated = this._activateUserSession(username);
-      
+      const activated = await this._activateUserSession(username);
+      if (this._isDestroyed) {
+        return;
+      }
+
       if (!activated) {
         // No session found, go to GDM login screen
         this._gotoLoginWindow();
       }
     }
 
-    _activateUserSession(username) {
-      const { sessions } = this._getSessionInfo();
+    async _activateUserSession(username) {
+      const { sessions } = await this._getSessionInfo();
+      if (this._isDestroyed) {
+        return false;
+      }
+
       const sessionData = sessions.get(username);
       if (!sessionData) {
         return false;
       }
 
-      const loginManagerProxy = this._ensureLoginManagerProxy();
-      if (!loginManagerProxy) {
+      const loginManagerProxy = await this._ensureLoginManagerProxy();
+      if (!loginManagerProxy || this._isDestroyed) {
         return false;
       }
 
       try {
-        loginManagerProxy.call_sync(
+        await loginManagerProxy.call(
           'ActivateSession',
           new GLib.Variant('(s)', [sessionData.sessionId]),
           Gio.DBusCallFlags.NONE,
           -1,
-          null
+          this._cancellable
         );
         return true;
       } catch (error) {
+        if (error?.matches?.(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED)) {
+          return false;
+        }
         logError(error, 'Failed to activate user session via login1 D-Bus');
         return false;
       }

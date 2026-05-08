@@ -32,6 +32,7 @@ function loadIconsMetadata(sourcePath) {
 }
 
 const OptionsPage = GObject.registerClass(
+  { GTypeName: 'KiwiMenuOptionsPage' },
   class OptionsPage extends Adw.PreferencesPage {
     constructor(settings, sourcePath, gettextFunc) {
       super({
