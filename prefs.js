@@ -424,7 +424,7 @@ export default class KiwiMenuPreferences extends ExtensionPreferences {
     const settings = this.getSettings();
     window._settings = settings;
     window.title = this.metadata.name ?? 'Kiwi Menu';
-    window.set_default_size(500, 710);
+    window.set_default_size(510, 710);
     window.set_size_request(360, 500);
     window.set_search_enabled(true);
 
@@ -551,15 +551,17 @@ export default class KiwiMenuPreferences extends ExtensionPreferences {
     aboutPage.add(headerGroup);
 
     // Content group with two columns: links (left) and QR + sponsor (right)
+    // Uses a horizontal Box that flips to vertical via Adw.Breakpoint when narrow.
     const contentGroup = new Adw.PreferencesGroup();
-    const contentGrid = new Gtk.Grid({
-      column_spacing: 24,
-      row_spacing: 12,
+    const contentBox = new Gtk.Box({
+      orientation: Gtk.Orientation.HORIZONTAL,
+      spacing: 24,
       margin_top: 8,
       margin_bottom: 16,
       margin_start: 16,
       margin_end: 16,
       hexpand: true,
+      homogeneous: true,
     });
 
     // Left column: link groups styled with ActionRows
@@ -585,7 +587,7 @@ export default class KiwiMenuPreferences extends ExtensionPreferences {
     infoGroup.add(this._createLegalRow(window, normalizedBaseUrl, _));
     leftColumn.append(infoGroup);
 
-    contentGrid.attach(leftColumn, 0, 0, 1, 1);
+    contentBox.append(leftColumn);
 
     // Right column: QR + sponsor button
     const rightColumn = new Gtk.Box({
@@ -643,10 +645,19 @@ export default class KiwiMenuPreferences extends ExtensionPreferences {
     });
     rightColumn.append(coffeeButton);
 
-    contentGrid.attach(rightColumn, 1, 0, 1, 1);
+    contentBox.append(rightColumn);
 
-    contentGroup.add(contentGrid);
+    contentGroup.add(contentBox);
     aboutPage.add(contentGroup);
+
+    // Responsive breakpoint: stack columns vertically when window is narrow.
+    const aboutBreakpoint = new Adw.Breakpoint({
+      condition: Adw.BreakpointCondition.parse('max-width: 500sp'),
+    });
+    aboutBreakpoint.add_setter(contentBox, 'orientation', Gtk.Orientation.VERTICAL);
+    aboutBreakpoint.add_setter(contentBox, 'homogeneous', false);
+    aboutBreakpoint.add_setter(rightColumn, 'margin-top', 0);
+    window.add_breakpoint(aboutBreakpoint);
 
     return aboutPage;
   }
