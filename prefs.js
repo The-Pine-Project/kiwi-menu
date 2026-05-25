@@ -425,7 +425,7 @@ export default class KiwiMenuPreferences extends ExtensionPreferences {
     window._settings = settings;
     window.title = this.metadata.name ?? 'Kiwi Menu';
     window.set_default_size(500, 710);
-    window.set_size_request(420, 550);
+    window.set_size_request(360, 500);
     window.set_search_enabled(true);
 
     // Add custom icons path to GTK icon theme search path
@@ -708,7 +708,7 @@ export default class KiwiMenuPreferences extends ExtensionPreferences {
 
     const copyrightGroup = new Adw.PreferencesGroup({
       title: _('Copyright'),
-      description: _('Copyright © 2025 Arnis Kemlers. Licensed under the terms of the GNU General Public License version 3 or later.'),
+      description: _('Copyright © 2026 Arnis Kemlers. Licensed under the terms of the GNU General Public License version 3 or later.'),
     });
     legalPage.add(copyrightGroup);
 
