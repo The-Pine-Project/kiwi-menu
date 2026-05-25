@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kiwi Menu 1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/kem-a/kiwimenu-kemma/issues\n"
-"POT-Creation-Date: 2025-11-03 00:00+0000\n"
+"POT-Creation-Date: 2026-05-25 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -230,7 +230,7 @@ msgid "Copyright"
 msgstr ""
 
 #: prefs.js
-msgid "Copyright © 2025 Arnis Kemlers. Licensed under the terms of the GNU General Public License version 3 or later."
+msgid "Copyright © 2026 Arnis Kemlers. Licensed under the terms of the GNU General Public License version 3 or later."
 msgstr ""
 
 #: prefs.js
@@ -239,4 +239,12 @@ msgstr ""
 
 #: prefs.js
 msgid "Sponsor Me ♡"
+msgstr ""
+
+#: prefs.js
+msgid "Apply Changes"
+msgstr ""
+
+#: prefs.js
+msgid "Change log"
 msgstr ""

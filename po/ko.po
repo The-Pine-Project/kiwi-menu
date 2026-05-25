@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kiwi Menu 1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/kem-a/kiwimenu-kemma/issues\n"
-"POT-Creation-Date: 2025-11-03 00:00+0000\n"
+"POT-Creation-Date: 2026-05-25 00:00+0000\n"
 "PO-Revision-Date: 2025-11-10 14:28+0900\n"
 "Last-Translator: \n"
 "Language-Team: Korean\n"
@@ -224,18 +224,18 @@ msgstr "Kiwi 메뉴는 오픈소스 자유 소프트웨어입니다."
 
 #: prefs.js
 msgid "GNU General Public License v3.0"
-msgstr ""
+msgstr "GNU 일반 공중 사용 허가서 v3.0"
 
 #: prefs.js
 msgid "Copyright"
-msgstr ""
+msgstr "저작권"
 
 #: prefs.js
 msgid ""
-"Copyright © 2025 Arnis Kemlers. Licensed under the terms of the GNU General "
+"Copyright © 2026 Arnis Kemlers. Licensed under the terms of the GNU General "
 "Public License version 3 or later."
 msgstr ""
-"저작권 © 2025 Arnis Kemlers. GNU 일반 공중 사용 허가서 버전 3 이상의 조건에 "
+"저작권 © 2026 Arnis Kemlers. GNU 일반 공중 사용 허가서 버전 3 이상의 조건에 "
 "따라 라이센스가 부여됩니다."
 
 #: prefs.js
@@ -245,3 +245,11 @@ msgstr "GitHub에서 후원자가 되기"
 #: prefs.js
 msgid "Sponsor Me ♡"
 msgstr "후원하기 ♡"
+
+#: prefs.js
+msgid "Apply Changes"
+msgstr "변경사항 적용"
+
+#: prefs.js
+msgid "Change log"
+msgstr "변경 내역"
