@@ -121,11 +121,13 @@ export class QuickSettingsActionsController {
       return;
     }
 
-    GLib.Source.remove(this._rescanSourceId);
+    GLib.source_remove(this._rescanSourceId);
     this._rescanSourceId = 0;
   }
 
   _ensureTracked() {
+    // Reaches into Shell-private layout: quickSettings._system._systemItem.child.
+    // Path verified on GNOME Shell 45–50; revisit if either node is renamed upstream.
     const container =
       Main.panel?.statusArea?.quickSettings?._system?._systemItem?.child ?? null;
 

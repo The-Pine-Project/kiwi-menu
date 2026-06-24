@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kiwi Menu 1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/kem-a/kiwimenu-kemma/issues\n"
-"POT-Creation-Date: 2025-11-03 00:00+0000\n"
+"POT-Creation-Date: 2026-05-25 00:00+0000\n"
 "PO-Revision-Date: 2025-11-02 17:50+0330\n"
 "Last-Translator: arashe22 <arashe22@proton.me>\n"
 "Language-Team: Persian\n"
@@ -234,10 +234,10 @@ msgstr "حق نشر"
 
 #: prefs.js
 msgid ""
-"Copyright © 2025 Arnis Kemlers. Licensed under the terms of the GNU General "
+"Copyright © 2026 Arnis Kemlers. Licensed under the terms of the GNU General "
 "Public License version 3 or later."
 msgstr ""
-"Copyright © 2025 Arnis Kemlers. تحت شرایط مجوز عمومی همگانی گنو نسخه ۳ یا "
+"Copyright © 2026 Arnis Kemlers. تحت شرایط مجوز عمومی همگانی گنو نسخه ۳ یا "
 "نسخه‌های بعدی منتشر شده است."
 
 #: prefs.js
@@ -247,3 +247,11 @@ msgstr "حامی مالی در GitHub شوید"
 #: prefs.js
 msgid "Sponsor Me ♡"
 msgstr "از من حمایت کنید ♡"
+
+#: prefs.js
+msgid "Apply Changes"
+msgstr "اعمال تغییرات"
+
+#: prefs.js
+msgid "Change log"
+msgstr "گزارش تغییرات"

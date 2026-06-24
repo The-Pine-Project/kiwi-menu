@@ -1,12 +1,12 @@
 # Estonian translation for Kiwi Menu
-# Copyright (C) 2025 Arnis Kemlers
+# Copyright (C) 2026 Arnis Kemlers
 # This file is distributed under the same license as the kiwimenu package.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: kiwimenu\n"
 "Report-Msgid-Bugs-To: https://github.com/kem-a/kiwimenu-kemma/issues\n"
-"POT-Creation-Date: 2025-11-03 00:00+0000\n"
+"POT-Creation-Date: 2026-05-25 00:00+0000\n"
 "PO-Revision-Date: 2025-10-27 12:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: Estonian\n"
@@ -230,10 +230,10 @@ msgstr "Autoriõigus"
 
 #: prefs.js
 msgid ""
-"Copyright © 2025 Arnis Kemlers. Licensed under the terms of the GNU General "
+"Copyright © 2026 Arnis Kemlers. Licensed under the terms of the GNU General "
 "Public License version 3 or later."
 msgstr ""
-"Autoriõigus © 2025 Arnis Kemlers. Litsentseeritud GNU üldise avaliku "
+"Autoriõigus © 2026 Arnis Kemlers. Litsentseeritud GNU üldise avaliku "
 "litsentsi versiooni 3 või hilisema tingimuste alusel."
 
 #: prefs.js
@@ -243,3 +243,11 @@ msgstr "Hakka sponsoriks GitHubis"
 #: prefs.js
 msgid "Sponsor Me ♡"
 msgstr "Toeta mind ♡"
+
+#: prefs.js
+msgid "Apply Changes"
+msgstr "Rakenda muudatused"
+
+#: prefs.js
+msgid "Change log"
+msgstr "Muudatuste logi"

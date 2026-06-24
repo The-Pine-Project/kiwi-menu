@@ -1,12 +1,12 @@
 # Portuguese translation for Kiwi Menu
-# Copyright (C) 2025 Arnis Kemlers
+# Copyright (C) 2026 Arnis Kemlers
 # This file is distributed under the same license as the kiwimenu package.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: kiwimenu\n"
 "Report-Msgid-Bugs-To: https://github.com/kem-a/kiwimenu-kemma/issues\n"
-"POT-Creation-Date: 2025-11-03 00:00+0000\n"
+"POT-Creation-Date: 2026-05-25 00:00+0000\n"
 "PO-Revision-Date: 2025-10-27 12:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
@@ -231,10 +231,10 @@ msgstr "Direitos de autor"
 
 #: prefs.js
 msgid ""
-"Copyright © 2025 Arnis Kemlers. Licensed under the terms of the GNU General "
+"Copyright © 2026 Arnis Kemlers. Licensed under the terms of the GNU General "
 "Public License version 3 or later."
 msgstr ""
-"Direitos de autor © 2025 Arnis Kemlers. Licenciado sob os termos da Licença "
+"Direitos de autor © 2026 Arnis Kemlers. Licenciado sob os termos da Licença "
 "Pública Geral GNU versão 3 ou posterior."
 
 #: prefs.js
@@ -244,3 +244,11 @@ msgstr "Torna-te um patrocinador no GitHub"
 #: prefs.js
 msgid "Sponsor Me ♡"
 msgstr "Patrocina-me ♡"
+
+#: prefs.js
+msgid "Apply Changes"
+msgstr "Aplicar alterações"
+
+#: prefs.js
+msgid "Change log"
+msgstr "Registo de alterações"

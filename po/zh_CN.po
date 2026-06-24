@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kiwi Menu 1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/kem-a/kiwimenu-kemma/issues\n"
-"POT-Creation-Date: 2025-11-03 00:00+0000\n"
+"POT-Creation-Date: 2026-05-25 00:00+0000\n"
 "PO-Revision-Date: 2025-11-02 10:45+0800\n"
 "Last-Translator: Markson Hosben <marksonhosben@proton.me>\n"
 "Language-Team: Chinese\n"
@@ -232,10 +232,10 @@ msgstr "版权"
 
 #: prefs.js
 msgid ""
-"Copyright © 2025 Arnis Kemlers. Licensed under the terms of the GNU General "
+"Copyright © 2026 Arnis Kemlers. Licensed under the terms of the GNU General "
 "Public License version 3 or later."
 msgstr ""
-"版权所有 © 2025 Arnis Kemlers。依据 GNU 通用公共许可证第 3 版或更高版本的条款"
+"版权所有 © 2026 Arnis Kemlers。依据 GNU 通用公共许可证第 3 版或更高版本的条款"
 "授权。"
 
 #: prefs.js
@@ -245,3 +245,11 @@ msgstr "在 GitHub 上成为赞助者"
 #: prefs.js
 msgid "Sponsor Me ♡"
 msgstr "赞助我 ♡"
+
+#: prefs.js
+msgid "Apply Changes"
+msgstr "应用更改"
+
+#: prefs.js
+msgid "Change log"
+msgstr "更新日志"

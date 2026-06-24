@@ -1,12 +1,12 @@
 # Latvian translation for Kiwi Menu
-# Copyright (C) 2025 Arnis Kemlers
+# Copyright (C) 2026 Arnis Kemlers
 # This file is distributed under the same license as the kiwimenu package.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: kiwimenu\n"
 "Report-Msgid-Bugs-To: https://github.com/kem-a/kiwimenu-kemma/issues\n"
-"POT-Creation-Date: 2025-11-03 00:00+0000\n"
+"POT-Creation-Date: 2026-05-25 00:00+0000\n"
 "PO-Revision-Date: 2025-10-27 12:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: Latvian\n"
@@ -230,10 +230,10 @@ msgstr "Autortiesības"
 
 #: prefs.js
 msgid ""
-"Copyright © 2025 Arnis Kemlers. Licensed under the terms of the GNU General "
+"Copyright © 2026 Arnis Kemlers. Licensed under the terms of the GNU General "
 "Public License version 3 or later."
 msgstr ""
-"Autortiesības © 2025 Arnis Kemlers. Licencēts saskaņā ar GNU vispārējās "
+"Autortiesības © 2026 Arnis Kemlers. Licencēts saskaņā ar GNU vispārējās "
 "publiskās licences 3. vai jaunākas versijas noteikumiem."
 
 #: prefs.js
@@ -243,6 +243,14 @@ msgstr "Kļūsti par sponsoru GitHub"
 #: prefs.js
 msgid "Sponsor Me ♡"
 msgstr "Atbalsti mani ♡"
+
+#: prefs.js
+msgid "Apply Changes"
+msgstr "Lietot izmaiņas"
+
+#: prefs.js
+msgid "Change log"
+msgstr "Izmaiņu žurnāls"
 
 #~ msgid "Show Activities Button"
 #~ msgstr "Rādīt aktivitāšu pogu"

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kiwi Menu 1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/kem-a/kiwimenu-kemma/issues\n"
-"POT-Creation-Date: 2025-11-03 00:00+0000\n"
+"POT-Creation-Date: 2026-05-25 00:00+0000\n"
 "PO-Revision-Date: 2026-01-21 12:00+0300\n"
 "Last-Translator: \n"
 "Language-Team: Turkish\n"
@@ -230,8 +230,12 @@ msgid "Copyright"
 msgstr "Telif Hakkı"
 
 #: prefs.js
-msgid "Copyright © 2025 Arnis Kemlers. Licensed under the terms of the GNU General Public License version 3 or later."
-msgstr "Telif Hakkı © 2025 Arnis Kemlers. GNU Genel Kamu Lisansı sürüm 3 veya üzeri şartları altında lisanslanmıştır."
+msgid ""
+"Copyright © 2026 Arnis Kemlers. Licensed under the terms of the GNU General "
+"Public License version 3 or later."
+msgstr ""
+"Telif Hakkı © 2026 Arnis Kemlers. GNU Genel Kamu Lisansı sürüm 3 veya üzeri "
+"şartları altında lisanslanmıştır."
 
 #: prefs.js
 msgid "Become a sponsor on GitHub"
@@ -240,3 +244,11 @@ msgstr "GitHub'da sponsor ol"
 #: prefs.js
 msgid "Sponsor Me ♡"
 msgstr "Bana Destek Ol ♡"
+
+#: prefs.js
+msgid "Apply Changes"
+msgstr "Değişiklikleri Uygula"
+
+#: prefs.js
+msgid "Change log"
+msgstr "Değişiklik günlüğü"

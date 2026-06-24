@@ -1,12 +1,12 @@
 # Swedish translation for Kiwi Menu
-# Copyright (C) 2025 Arnis Kemlers
+# Copyright (C) 2026 Arnis Kemlers
 # This file is distributed under the same license as the kiwimenu package.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: kiwimenu\n"
 "Report-Msgid-Bugs-To: https://github.com/kem-a/kiwimenu-kemma/issues\n"
-"POT-Creation-Date: 2025-11-03 00:00+0000\n"
+"POT-Creation-Date: 2026-05-25 00:00+0000\n"
 "PO-Revision-Date: 2025-10-27 12:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: Swedish\n"
@@ -230,10 +230,10 @@ msgstr "Upphovsrätt"
 
 #: prefs.js
 msgid ""
-"Copyright © 2025 Arnis Kemlers. Licensed under the terms of the GNU General "
+"Copyright © 2026 Arnis Kemlers. Licensed under the terms of the GNU General "
 "Public License version 3 or later."
 msgstr ""
-"Upphovsrätt © 2025 Arnis Kemlers. Licensierad under villkoren i GNU General "
+"Upphovsrätt © 2026 Arnis Kemlers. Licensierad under villkoren i GNU General "
 "Public License version 3 eller senare."
 
 #: prefs.js
@@ -243,3 +243,11 @@ msgstr "Bli sponsor på GitHub"
 #: prefs.js
 msgid "Sponsor Me ♡"
 msgstr "Sponsra mig ♡"
+
+#: prefs.js
+msgid "Apply Changes"
+msgstr "Verkställ ändringar"
+
+#: prefs.js
+msgid "Change log"
+msgstr "Ändringslogg"
